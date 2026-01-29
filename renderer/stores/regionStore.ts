@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { RegionCode, SIDO_CODES, SEOUL_GUGUN_CODES } from '../lib/publicApi';
+import { RegionCode, SIDO_CODES, getGugunBySido } from '../data/regionCodes';
 
 interface RegionState {
   // 선택된 지역
@@ -54,8 +54,8 @@ export const useRegionStore = create<RegionState>()(
           selectedGugun: null,
           selectedDong: null,
           dongList: [],
-          // 서울시인 경우 구군 목록 설정 (임시 - 나중에 API로 대체)
-          gugunList: sido?.code === '11' ? SEOUL_GUGUN_CODES : [],
+          // 시도에 해당하는 시군구 목록 가져오기
+          gugunList: sido ? getGugunBySido(sido.code) : [],
         });
       },
 
@@ -94,9 +94,18 @@ export const useRegionStore = create<RegionState>()(
         endYear: state.endYear,
         endMonth: state.endMonth,
       }),
+      // localStorage에서 복원 후 gugunList 재설정
+      onRehydrateStorage: () => (state) => {
+        if (state?.selectedSido) {
+          state.gugunList = getGugunBySido(state.selectedSido.code);
+        }
+      },
     }
   )
 );
 
 // 시도 목록 가져오기
 export const getSidoList = (): RegionCode[] => SIDO_CODES;
+
+// RegionCode 타입 재export
+export type { RegionCode };

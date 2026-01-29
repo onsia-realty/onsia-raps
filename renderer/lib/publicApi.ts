@@ -95,62 +95,10 @@ export interface ApartmentRentItem {
   층: number;
 }
 
-// 지역코드 타입
-export interface RegionCode {
-  code: string;
-  name: string;
-  parentCode?: string;
-}
-
-// 시도 코드 목록
-export const SIDO_CODES: RegionCode[] = [
-  { code: '11', name: '서울특별시' },
-  { code: '26', name: '부산광역시' },
-  { code: '27', name: '대구광역시' },
-  { code: '28', name: '인천광역시' },
-  { code: '29', name: '광주광역시' },
-  { code: '30', name: '대전광역시' },
-  { code: '31', name: '울산광역시' },
-  { code: '36', name: '세종특별자치시' },
-  { code: '41', name: '경기도' },
-  { code: '43', name: '충청북도' },
-  { code: '44', name: '충청남도' },
-  { code: '46', name: '전라남도' },
-  { code: '47', name: '경상북도' },
-  { code: '48', name: '경상남도' },
-  { code: '50', name: '제주특별자치도' },
-  { code: '51', name: '강원특별자치도' },
-  { code: '52', name: '전북특별자치도' },
-];
-
-// 서울시 구 코드 목록 (예시)
-export const SEOUL_GUGUN_CODES: RegionCode[] = [
-  { code: '11110', name: '종로구', parentCode: '11' },
-  { code: '11140', name: '중구', parentCode: '11' },
-  { code: '11170', name: '용산구', parentCode: '11' },
-  { code: '11200', name: '성동구', parentCode: '11' },
-  { code: '11215', name: '광진구', parentCode: '11' },
-  { code: '11230', name: '동대문구', parentCode: '11' },
-  { code: '11260', name: '중랑구', parentCode: '11' },
-  { code: '11290', name: '성북구', parentCode: '11' },
-  { code: '11305', name: '강북구', parentCode: '11' },
-  { code: '11320', name: '도봉구', parentCode: '11' },
-  { code: '11350', name: '노원구', parentCode: '11' },
-  { code: '11380', name: '은평구', parentCode: '11' },
-  { code: '11410', name: '서대문구', parentCode: '11' },
-  { code: '11440', name: '마포구', parentCode: '11' },
-  { code: '11470', name: '양천구', parentCode: '11' },
-  { code: '11500', name: '강서구', parentCode: '11' },
-  { code: '11530', name: '구로구', parentCode: '11' },
-  { code: '11545', name: '금천구', parentCode: '11' },
-  { code: '11560', name: '영등포구', parentCode: '11' },
-  { code: '11590', name: '동작구', parentCode: '11' },
-  { code: '11620', name: '관악구', parentCode: '11' },
-  { code: '11650', name: '서초구', parentCode: '11' },
-  { code: '11680', name: '강남구', parentCode: '11' },
-  { code: '11710', name: '송파구', parentCode: '11' },
-  { code: '11740', name: '강동구', parentCode: '11' },
-];
+// 지역코드는 별도 파일에서 관리
+// import { RegionCode, SIDO_CODES, GUGUN_CODES, getGugunBySido } from '../data/regionCodes';
+export type { RegionCode } from '../data/regionCodes';
+export { SIDO_CODES, GUGUN_CODES, getGugunBySido } from '../data/regionCodes';
 
 // 날짜 포맷 함수 (YYYYMM)
 export function formatYearMonth(year: number, month: number): string {

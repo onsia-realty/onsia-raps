@@ -14,7 +14,7 @@ export default function SettingsPage() {
       return;
     }
     // 실제로는 환경변수나 안전한 저장소에 저장해야 함
-    localStorage.setItem('PUBLIC_DATA_API_KEY', apiKey);
+    localStorage.setItem('DATA_GO_KR_API_KEY', apiKey);
     showNotification('success', 'API 키가 저장되었습니다.');
   };
 

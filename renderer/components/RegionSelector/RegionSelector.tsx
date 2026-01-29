@@ -1,8 +1,7 @@
 import React from 'react';
 import { MapPin, Calendar } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { useRegionStore, getSidoList } from '../../stores/regionStore';
-import { RegionCode } from '../../lib/publicApi';
+import { useRegionStore, getSidoList, RegionCode } from '../../stores/regionStore';
 
 interface RegionSelectorProps {
   showDateRange?: boolean;

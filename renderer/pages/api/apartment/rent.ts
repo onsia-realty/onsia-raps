@@ -11,7 +11,7 @@ const xmlParser = new XMLParser({
   trimValues: true,
 });
 
-const API_KEY = process.env.PUBLIC_DATA_API_KEY || '';
+const API_KEY = process.env.DATA_GO_KR_API_KEY || '';
 const API_URL = 'http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSDataSvcAptRent/getRTMSDataSvcAptRent';
 
 interface RentApiResponse {

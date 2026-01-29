@@ -102,9 +102,22 @@ export function useApartmentTradeRange(
   });
 }
 
-// 통계 계산 유틸
-export function calculateTradeStats(data: ApartmentTradeItem[]) {
-  if (data.length === 0) {
+/**
+ * 거래금액을 숫자로 변환 (문자열/숫자 모두 처리)
+ */
+function parseTradePrice(price: string | number): number {
+  if (typeof price === 'number') {
+    return price;
+  }
+  if (typeof price === 'string') {
+    return parseInt(price.replace(/,/g, ''), 10) || 0;
+  }
+  return 0;
+}
+
+// 통계 계산 유틸 (any 타입으로 다양한 데이터 형식 지원)
+export function calculateTradeStats(data: any[]) {
+  if (!data || data.length === 0) {
     return {
       count: 0,
       avgPrice: 0,
@@ -114,22 +127,31 @@ export function calculateTradeStats(data: ApartmentTradeItem[]) {
     };
   }
 
-  const prices = data.map((item) =>
-    parseInt(item.거래금액.replace(/,/g, ''), 10)
-  );
-  const pricesPerPyeong = data.map((item) => {
-    const price = parseInt(item.거래금액.replace(/,/g, ''), 10);
-    const pyeong = item.전용면적 / 3.3058;
-    return price / pyeong;
+  const prices = data.map((item) => {
+    // 새 API 형식 (거래금액: number) 또는 기존 형식 (거래금액: string) 모두 처리
+    const price = item.거래금액 ?? item.dealAmount ?? 0;
+    return parseTradePrice(price);
   });
+
+  const pricesPerPyeong = data.map((item) => {
+    const price = parseTradePrice(item.거래금액 ?? item.dealAmount ?? 0);
+    const area = item.전용면적 ?? item.excluUseAr ?? 0;
+    const pyeong = area / 3.3058;
+    return pyeong > 0 ? price / pyeong : 0;
+  });
+
+  const validPrices = prices.filter((p) => p > 0);
+  const validPricesPerPyeong = pricesPerPyeong.filter((p) => p > 0);
 
   return {
     count: data.length,
-    avgPrice: Math.round(prices.reduce((a, b) => a + b, 0) / prices.length),
-    maxPrice: Math.max(...prices),
-    minPrice: Math.min(...prices),
-    avgPricePerPyeong: Math.round(
-      pricesPerPyeong.reduce((a, b) => a + b, 0) / pricesPerPyeong.length
-    ),
+    avgPrice: validPrices.length > 0
+      ? Math.round(validPrices.reduce((a, b) => a + b, 0) / validPrices.length)
+      : 0,
+    maxPrice: validPrices.length > 0 ? Math.max(...validPrices) : 0,
+    minPrice: validPrices.length > 0 ? Math.min(...validPrices) : 0,
+    avgPricePerPyeong: validPricesPerPyeong.length > 0
+      ? Math.round(validPricesPerPyeong.reduce((a, b) => a + b, 0) / validPricesPerPyeong.length)
+      : 0,
   };
 }
