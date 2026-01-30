@@ -12,6 +12,7 @@ import {
   List,
   Grid,
   Building2,
+  Map as MapIcon,
 } from 'lucide-react';
 import { MainLayout } from '../../components/Layout';
 import { RegionSelector } from '../../components/RegionSelector';
@@ -27,6 +28,7 @@ import {
   ComplexStatsTable,
   ComplexStats,
 } from '../../components/Analysis';
+import { MapView, MapModal } from '../../components/Map';
 import { useRegionStore } from '../../stores/regionStore';
 import { useUIStore } from '../../stores/uiStore';
 import { useApartmentTrade, calculateTradeStats } from '../../hooks/useApartmentData';
@@ -34,7 +36,7 @@ import { formatPrice, formatArea } from '../../lib/publicApi';
 import { aggregateByComplex, getSampleComplexStats } from '../../lib/aggregateByComplex';
 import { cn } from '../../lib/cn';
 
-type ViewMode = 'overview' | 'complex' | 'table' | 'chart';
+type ViewMode = 'overview' | 'complex' | 'table' | 'chart' | 'map';
 
 // 샘플 지역 통계 데이터
 const sampleRegionStats: RegionStats[] = [
@@ -161,6 +163,8 @@ export default function ApartmentPage() {
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [selectedComplex, setSelectedComplex] = useState<ComplexStats | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     region: '',
     period: '202601',
@@ -237,7 +241,8 @@ export default function ApartmentPage() {
   };
 
   const handleMapClick = (complex: ComplexStats) => {
-    showNotification('info', `${complex.name} 지도 보기 (준비중)`);
+    setSelectedComplex(complex);
+    setMapModalOpen(true);
   };
 
   // 통계 계산
@@ -390,6 +395,18 @@ export default function ApartmentPage() {
           >
             <BarChart3 size={16} />
             차트
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={cn(
+              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+              viewMode === 'map'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-100'
+            )}
+          >
+            <MapIcon size={16} />
+            지도
           </button>
         </div>
 
@@ -580,6 +597,53 @@ export default function ApartmentPage() {
           )}
         </>
       )}
+
+      {/* 지도 뷰 */}
+      {viewMode === 'map' && (
+        <MapView
+          complexes={complexStats.map((c) => ({
+            id: c.id,
+            name: c.name,
+            dong: c.dong,
+            tradePrice: c.tradePrice,
+            tradePriceText: `${Math.floor(c.tradePrice / 10000)}억 ${(c.tradePrice % 10000).toLocaleString()}`,
+          }))}
+          regionName={regionLabel}
+          onComplexSelect={(complex) => {
+            const found = complexStats.find((c) => c.id === complex.id);
+            if (found) {
+              setSelectedComplex(found);
+            }
+          }}
+        />
+      )}
+
+      {/* 단지 지도 모달 */}
+      <MapModal
+        isOpen={mapModalOpen}
+        onClose={() => {
+          setMapModalOpen(false);
+          setSelectedComplex(null);
+        }}
+        title={selectedComplex ? `${selectedComplex.name} 위치` : '아파트 위치'}
+        markers={
+          selectedComplex
+            ? [
+                {
+                  id: selectedComplex.id,
+                  name: selectedComplex.name,
+                  lat: selectedComplex.lat || 37.5172 + (Math.random() - 0.5) * 0.01,
+                  lng: selectedComplex.lng || 127.0473 + (Math.random() - 0.5) * 0.01,
+                  price: selectedComplex.tradePrice,
+                  priceText: `${Math.floor(selectedComplex.tradePrice / 10000)}억`,
+                  dong: selectedComplex.dong,
+                  info: `${selectedComplex.avgPyeong}평 / ${selectedComplex.buildYear}년 / ${selectedComplex.tradeCount}건`,
+                },
+              ]
+            : []
+        }
+        selectedMarkerId={selectedComplex?.id}
+      />
     </MainLayout>
   );
 }
